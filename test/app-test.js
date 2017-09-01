@@ -31,6 +31,39 @@ module.exports = {
         assert.equal(res.body.message, 'Not Found')
         done(err)
       })
+    },
+    'GET /timestamp/:time |': {
+      'Invalid param': (done) => {
+        this.server = this.subject(3333)
+        request(this.server).get('/timestamp/invalid').end((err, res) => {
+          assert.equal(res.status, 400)
+          assert.equal(res.body.message, 'Bad Request')
+          assert.equal(res.body.unix, null)
+          assert.equal(res.body.natural, null)
+          done(err)
+        })
+      },
+      'Param is unix timestamp': (done) => {
+        this.server = this.subject(3333)
+        request(this.server).get('/timestamp/1483228800').end((err, res) => {
+          assert.equal(res.status, 200)
+          assert.equal(res.body.message, undefined)
+          assert.equal(res.body.unix, 1483228800)
+          assert.equal(res.body.natural, 'January 1, 2017')
+          done(err)
+        })
+      },
+      'Param is date in [MMMM D, YYYY] format': (done) => {
+        this.server = this.subject(3333)
+        request(this.server).get('/timestamp/January 1, 2017')
+        .end((err, res) => {
+          assert.equal(res.status, 200)
+          assert.equal(res.body.message, undefined)
+          assert.equal(res.body.unix, 1483228800)
+          assert.equal(res.body.natural, 'January 1, 2017')
+          done(err)
+        })
+      }
     }
   }
 }
